@@ -1,17 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:social_app/components/comment.dart';
+import 'package:social_app/components/comment_button.dart';
+import 'package:social_app/components/delete_button.dart';
 import 'package:social_app/components/like_button.dart';
+import 'package:social_app/helper/helper_methods.dart';
 
 class Post extends StatefulWidget {
   final String message;
   final String user;
+  final String time;
   final String postId;
   final List<String> likes;
   const Post({
     super.key,
     required this.message,
     required this.user,
+    required this.time,
     required this.postId,
     required this.likes,
   });
@@ -23,7 +29,12 @@ class Post extends StatefulWidget {
 class _PostState extends State<Post> {
   //current user
   final currentUser = FirebaseAuth.instance.currentUser!;
+
+  //initialize the liked value
   bool isLiked = false;
+
+  //comment text controller
+  final _commentTextController = TextEditingController();
 
   @override
   void initState() {
@@ -54,49 +65,320 @@ class _PostState extends State<Post> {
     }
   }
 
+  //add a comment
+  void addComment(String commentText) {
+    //write the comment to firestore under the comments collection for this post
+    FirebaseFirestore.instance
+        .collection("User Posts")
+        .doc(widget.postId)
+        .collection("Comments")
+        .add({
+      "CommentText": commentText,
+      "CommentedBy": currentUser.email,
+      "CommentTime": Timestamp.now()
+    });
+  }
+
+  //show a dialog box for adding comment
+  void showCommentDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Add Comment"),
+        content: TextField(
+          controller: _commentTextController,
+          decoration: InputDecoration(hintText: "Write a comment..."),
+        ),
+        actions: [
+          //cancel button
+          TextButton(
+            onPressed: () {
+              //pop box
+              Navigator.pop(context);
+              //clear controller
+              _commentTextController.clear();
+            },
+            child: Text("Cancel"),
+          ),
+          //post button
+          TextButton(
+            onPressed: () {
+              //add comment
+              addComment(_commentTextController.text);
+              //pop box
+              Navigator.pop(context);
+              //clear controller
+              _commentTextController.clear();
+            },
+            child: Text("Post"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  //delete a comment
+  void deleteComment(DocumentSnapshot commentSnapshot) async {
+    //show a dialog box asking for confirmation before deleting the comment
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Delete Comment"),
+        content: const Text("Are you sure you want to delete this comment?"),
+        actions: [
+          //cancel button
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+
+          //delete button
+          TextButton(
+            onPressed: () async {
+              //delete the comment
+              final commentDocs = await FirebaseFirestore.instance
+                  .collection("User Posts")
+                  .doc(widget.postId)
+                  .collection("Comments")
+                  .doc(commentSnapshot.id)
+                  .delete()
+                  .then((value) => print("comment deleted"))
+                  .catchError(
+                      (error) => print("failed to delete comment: $error"));
+
+              //pop the dialog
+              Navigator.pop(context);
+            },
+            child: const Text("Delete"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  //delete a post
+  void deletePost() {
+    //show a dialog box asking for confirmation before deleting the post
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Delete Post"),
+        content: const Text("Are you sure you want to delete this post?"),
+        actions: [
+          //cancel button
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+
+          //delete button
+          TextButton(
+            onPressed: () async {
+              //delete the comments from firestore first
+              //(if you only delete the post, the comments will be stored in firestore)
+              final commentDocs = await FirebaseFirestore.instance
+                  .collection("User Posts")
+                  .doc(widget.postId)
+                  .collection("Comments")
+                  .get();
+
+              for (var doc in commentDocs.docs) {
+                await FirebaseFirestore.instance
+                    .collection("User Posts")
+                    .doc(widget.postId)
+                    .collection("Comments")
+                    .doc(doc.id)
+                    .delete();
+              }
+
+              //then delete the post
+              FirebaseFirestore.instance
+                  .collection("User Posts")
+                  .doc(widget.postId)
+                  .delete()
+                  .then((value) => print("post deleted"))
+                  .catchError(
+                      (error) => print("failed to delete post: $error"));
+
+              //pop the dialog
+              Navigator.pop(context);
+            },
+            child: const Text("Delete"),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.grey[200],
         borderRadius: BorderRadius.circular(8),
       ),
       margin: EdgeInsets.only(top: 25, left: 25, right: 25),
       padding: EdgeInsets.all(25),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
+          //post
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //like button
-              LikeButton(
-                isLiked: isLiked,
-                onTap: toggleLikeButton,
+              //group of text
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  //message
+                  Text(widget.message),
+                  const SizedBox(height: 5),
+                  //user
+                  Row(
+                    children: [
+                      Text(
+                        widget.user,
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                        ),
+                      ),
+                      Text(
+                        " - ",
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                        ),
+                      ),
+                      Text(
+                        widget.time,
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              const SizedBox(height: 5),
-              //like count
-              Text(
-                widget.likes.length.toString(),
-                style: TextStyle(
-                  color: Colors.grey,
+
+              //delete post button
+              if (widget.user == currentUser.email)
+                DeleteButton(
+                  onTap: deletePost,
                 ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          //buttons
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              //LIKE
+              Column(
+                children: [
+                  //like button
+                  LikeButton(
+                    isLiked: isLiked,
+                    onTap: toggleLikeButton,
+                  ),
+                  const SizedBox(height: 5),
+                  //like count
+                  Text(
+                    widget.likes.length.toString(),
+                    style: TextStyle(
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(width: 10),
+
+              //COMMENT
+              Column(
+                children: [
+                  //comment button
+                  CommentButton(
+                    onTap: showCommentDialog,
+                  ),
+                  const SizedBox(height: 5),
+                  //comment count
+                  StreamBuilder<int>(
+                    stream: FirebaseFirestore.instance
+                        .collection("User Posts")
+                        .doc(widget.postId)
+                        .collection("Comments")
+                        .snapshots()
+                        .map((snapshot) => snapshot.size),
+                    builder: (context, snapshot) {
+                      //show loading circle if no data yet
+                      if (!snapshot.hasData) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                      return Text(
+                        snapshot.data.toString(),
+                        style: TextStyle(
+                          color: Colors.grey,
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),
-          const SizedBox(width: 20),
-          //message and user email
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.user,
-                style: TextStyle(
-                  color: Colors.grey[500],
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(widget.message),
-            ],
-          )
+          const SizedBox(height: 20),
+          //comment under the post
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection("User Posts")
+                .doc(widget.postId)
+                .collection("Comments")
+                .orderBy(
+                  "CommentTime",
+                  descending: true,
+                )
+                .snapshots(),
+            builder: (context, snapshot) {
+              //show loading circle if no data yet
+              if (!snapshot.hasData) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              return ListView(
+                shrinkWrap: true, //for nested list
+                physics: const NeverScrollableScrollPhysics(),
+                children: snapshot.data!.docs.map((doc) {
+                  //get the comment
+                  final commentData = doc.data() as Map<String, dynamic>;
+
+                  //return the comments
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Comment(
+                        text: commentData["CommentText"],
+                        user: commentData["CommentedBy"],
+                        time: formatDate(commentData["CommentTime"]),
+                      ),
+
+                      //delete comment button
+                      if (commentData["CommentedBy"] == currentUser.email)
+                        DeleteButton(
+                          onTap: () {
+                            deleteComment(doc);
+                          },
+                        ),
+                    ],
+                  );
+                }).toList(),
+              );
+            },
+          ),
         ],
       ),
     );
