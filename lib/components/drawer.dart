@@ -3,11 +3,11 @@ import 'package:social_app/components/list_tile.dart';
 
 class MyDrawer extends StatelessWidget {
   final void Function()? onProfile;
-  final void Function()? onSignout;
+  final void Function()? onSignOut;
   const MyDrawer({
     super.key,
     required this.onProfile,
-    required this.onSignout,
+    required this.onSignOut,
   });
 
   @override
@@ -35,7 +35,7 @@ class MyDrawer extends StatelessWidget {
                 onTap: () => Navigator.pop(context),
               ),
 
-              //profire list tile
+              //profile list tile
               MyListTile(
                 icon: Icons.person,
                 text: "P R O F I L E",
@@ -50,7 +50,7 @@ class MyDrawer extends StatelessWidget {
             child: MyListTile(
               icon: Icons.logout,
               text: "L O G O U T",
-              onTap: onSignout,
+              onTap: onSignOut,
             ),
           ),
         ],

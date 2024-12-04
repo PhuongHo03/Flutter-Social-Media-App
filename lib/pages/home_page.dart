@@ -1,10 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:social_app/components/drawer.dart';
 import 'package:social_app/components/post.dart';
 import 'package:social_app/components/text_field.dart';
-import 'package:social_app/helper/helper_methods.dart';
+import 'package:social_app/helper/format_date.dart';
 import 'package:social_app/pages/profile_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -64,10 +64,10 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Colors.grey[300],
       appBar: AppBar(
         //color of all icon in appbar
-        iconTheme: IconThemeData(
+        iconTheme: const IconThemeData(
           color: Colors.white,
         ),
-        title: Center(
+        title: const Center(
           child: Text(
             "Social Media App",
             style: TextStyle(
@@ -81,7 +81,7 @@ class _HomePageState extends State<HomePage> {
       //drawer
       drawer: MyDrawer(
         onProfile: goToProfilePage,
-        onSignout: signOut,
+        onSignOut: signOut,
       ),
 
       body: Center(
@@ -154,8 +154,8 @@ class _HomePageState extends State<HomePage> {
 
             //logged in as
             Text(
-              "Logged in as: " + currentUser.email!,
-              style: TextStyle(
+              "Logged in as: ${currentUser.email!}",
+              style: const TextStyle(
                 color: Colors.grey,
               ),
             ),

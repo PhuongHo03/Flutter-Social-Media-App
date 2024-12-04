@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
-import '../components/button.dart';
-import '../components/text_field.dart';
+import 'package:social_app/components/button.dart';
+import 'package:social_app/components/text_field.dart';
 
 class RegisterPage extends StatefulWidget {
   final Function()? onTap;
@@ -93,7 +92,7 @@ class _RegisterPageState extends State<RegisterPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 //logo
-                Icon(
+                const Icon(
                   Icons.lock,
                   size: 100,
                 ),
@@ -101,7 +100,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 50),
 
                 //title
-                Text(
+                const Text(
                   'Sign-Up',
                   style: TextStyle(
                     fontSize: 26,

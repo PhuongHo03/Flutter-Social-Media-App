@@ -5,7 +5,7 @@ import 'package:social_app/components/comment.dart';
 import 'package:social_app/components/comment_button.dart';
 import 'package:social_app/components/delete_button.dart';
 import 'package:social_app/components/like_button.dart';
-import 'package:social_app/helper/helper_methods.dart';
+import 'package:social_app/helper/format_date.dart';
 
 class Post extends StatefulWidget {
   final String message;
@@ -84,10 +84,10 @@ class _PostState extends State<Post> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Add Comment"),
+        title: const Text("Add Comment"),
         content: TextField(
           controller: _commentTextController,
-          decoration: InputDecoration(hintText: "Write a comment..."),
+          decoration: const InputDecoration(hintText: "Write a comment..."),
         ),
         actions: [
           //cancel button
@@ -98,7 +98,7 @@ class _PostState extends State<Post> {
               //clear controller
               _commentTextController.clear();
             },
-            child: Text("Cancel"),
+            child: const Text("Cancel"),
           ),
           //post button
           TextButton(
@@ -110,7 +110,7 @@ class _PostState extends State<Post> {
               //clear controller
               _commentTextController.clear();
             },
-            child: Text("Post"),
+            child: const Text("Post"),
           ),
         ],
       ),
@@ -136,7 +136,7 @@ class _PostState extends State<Post> {
           TextButton(
             onPressed: () async {
               //delete the comment
-              final commentDocs = await FirebaseFirestore.instance
+              await FirebaseFirestore.instance
                   .collection("User Posts")
                   .doc(widget.postId)
                   .collection("Comments")
@@ -217,8 +217,8 @@ class _PostState extends State<Post> {
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(8),
       ),
-      margin: EdgeInsets.only(top: 25, left: 25, right: 25),
-      padding: EdgeInsets.all(25),
+      margin: const EdgeInsets.only(top: 25, left: 25, right: 25),
+      padding: const EdgeInsets.all(25),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -286,7 +286,7 @@ class _PostState extends State<Post> {
                   //like count
                   Text(
                     widget.likes.length.toString(),
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.grey,
                     ),
                   ),
@@ -320,7 +320,7 @@ class _PostState extends State<Post> {
                       }
                       return Text(
                         snapshot.data.toString(),
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.grey,
                         ),
                       );
@@ -350,8 +350,10 @@ class _PostState extends State<Post> {
                 );
               }
               return ListView(
-                shrinkWrap: true, //for nested list
-                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap:
+                    true, //Wrap content to avoid unnecessary space for nested list
+                physics:
+                    const NeverScrollableScrollPhysics(), //Disable scrolling if comment list is small
                 children: snapshot.data!.docs.map((doc) {
                   //get the comment
                   final commentData = doc.data() as Map<String, dynamic>;

@@ -71,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 //logo
-                Icon(
+                const Icon(
                   Icons.lock,
                   size: 100,
                 ),
@@ -79,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 50),
 
                 //title
-                Text(
+                const Text(
                   'Log-In',
                   style: TextStyle(
                     fontSize: 26,

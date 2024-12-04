@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:social_app/components/text_box.dart';
+import 'package:social_app/helper/format_date.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -30,12 +31,12 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         content: TextField(
           autofocus: true,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
           ),
           decoration: InputDecoration(
             hintText: "Enter new $field",
-            hintStyle: TextStyle(
+            hintStyle: const TextStyle(
               color: Colors.grey,
             ),
           ),
@@ -47,7 +48,7 @@ class _ProfilePageState extends State<ProfilePage> {
           //cancer button
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(
+            child: const Text(
               "Cancel",
               style: TextStyle(
                 color: Colors.white,
@@ -58,7 +59,7 @@ class _ProfilePageState extends State<ProfilePage> {
           //save button
           TextButton(
             onPressed: () => Navigator.of(context).pop(newValue),
-            child: Text(
+            child: const Text(
               "Save",
               style: TextStyle(
                 color: Colors.white,
@@ -70,7 +71,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
 
     //update in firestore
-    if (newValue.trim().length > 0) {
+    if (newValue.trim().isNotEmpty) {
       //only update if there is something in the text field
       await usersCollection.doc(currentUser.email).update({field: newValue});
     }
@@ -81,7 +82,11 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: Colors.grey[300],
       appBar: AppBar(
-        title: Center(
+        //color of all icon in appbar
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ),
+        title: const Center(
           child: Text(
             "Profile Page",
             style: TextStyle(
@@ -147,7 +152,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                 const SizedBox(height: 50),
 
-                //user post
+                //user's posts
                 Padding(
                   padding: const EdgeInsets.only(left: 25.0),
                   child: Text(
@@ -155,6 +160,47 @@ class _ProfilePageState extends State<ProfilePage> {
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                 ),
+
+                //posts overview
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection("User Posts")
+                      .where("UserEmail", isEqualTo: currentUser.email)
+                      .snapshots(),
+                  builder: (context, snapshots) {
+                    if (snapshots.hasData) {
+                      final posts = snapshots.data!.docs;
+
+                      //Filter and sort posts on the client-side
+                      final filteredPosts = posts
+                          .where((doc) => doc['UserEmail'] == currentUser.email)
+                          .toList();
+                      filteredPosts.sort((a, b) => a['TimeStamp']
+                          .compareTo(b['TimeStamp'])); //TimeStamp descending
+
+                      return ListView.builder(
+                        shrinkWrap:
+                            true, //Wrap content to avoid unnecessary space for nested list
+                        physics:
+                            const NeverScrollableScrollPhysics(), //Disable scrolling if comment list is small
+                        itemCount: filteredPosts.length,
+                        itemBuilder: (context, index) {
+                          final postData = filteredPosts[index].data()
+                              as Map<String, dynamic>;
+                          //show posts
+                          return MyTextBox(
+                            text: postData["Message"],
+                            sectionName: formatDate(postData["TimeStamp"]),
+                            onPressed: () => Navigator.pop(context),
+                          );
+                        },
+                      );
+                    } else if (snapshots.hasError) {
+                      return Text("Error: ${snapshots.error}");
+                    }
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                )
               ],
             );
           } else if (snapshots.hasError) {
