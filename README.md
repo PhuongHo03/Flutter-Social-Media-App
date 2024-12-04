@@ -30,7 +30,7 @@ Flutter-Social-Media-App có những tính năng chính như sau:
 
 4. Tạo 1 dự án Firebase, hướng dẫn tại đây: [https://console.firebase.google.com](https://console.firebase.google.com/).
 
-5. Trong dự án Firebase, Khởi tạo các dịch vụ Firebase Auth, Firebase Firestore, and Firebase Storage.
+5. Trong dự án Firebase, Khởi tạo các dịch vụ Firebase Auth và Firebase Firestore.
 
 6. Lưu ý:
 - Khi cài đặt FireBase CLI, nên sử dụng phương thức npm (the Node Package Manager).
@@ -42,7 +42,7 @@ firebase projects:list
 dart pub global activate flutterfire_cli
 - Trong Command Promdt di chuyển đến thư mục chính chứa dự án Flutter-Social-Media-App, chạy lệnh:
 flutterfire configure --project=TÊN DỰ ÁN FIREBASE
-- Hệ thống sẽ tự tạo file cấu hình cho dịch vụ FireBase trong thư mục dự án Flutter-Social-Media-App (lib/firebase_options.dart).
+- Hệ thống sẽ tự tạo file cấu hình cho dịch vụ Firebase trong thư mục dự án Flutter-Social-Media-App (lib/firebase_options.dart).
   
 7. Mở Android Studio, mở dự án Flutter-Social-Media-App, tại của sổ Terminal chạy lệnh:
 Flutter pub get
@@ -55,8 +55,7 @@ Flutter pub get
 Flutter-Social-Media-App utilizes Firebase services as the back-end platform, leveraging the resources provided by Firebase to ensure a smooth and reliable user experience. The Firebase setup includes:
 
 * **Firebase Auth:** Used for user authentication, enabling secure registration and login.
-* **Firebase Firestore:** Responsible for storing user information, Tweets, and the Follow system. It is a real-time database that keeps information synchronized across all connected devices.
-* **Firebase Storage:** Utilized to store user profile and comments.
+* **Firebase Firestore:** Responsible for storing user information, user posts and user comments. It is a real-time database that keeps information synchronized across all connected devices.
 
 ## Contributing
 
