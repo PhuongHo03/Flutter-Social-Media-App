@@ -5,6 +5,7 @@ import 'package:social_app/components/drawer.dart';
 import 'package:social_app/components/post.dart';
 import 'package:social_app/components/text_field.dart';
 import 'package:social_app/helper/format_date.dart';
+import 'package:social_app/pages/chatroom_page.dart';
 import 'package:social_app/pages/profile_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -58,9 +59,24 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  //navigator to chatroom page
+  void goToChatRoomPage() {
+    //pop menu drawer
+    Navigator.pop(context);
+
+    //go to chatroom page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChatroomPage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      //color of the app's background
       backgroundColor: Colors.grey[300],
       appBar: AppBar(
         //color of all icon in appbar
@@ -81,6 +97,7 @@ class _HomePageState extends State<HomePage> {
       //drawer
       drawer: MyDrawer(
         onProfile: goToProfilePage,
+        onChatRoom: goToChatRoomPage,
         onSignOut: signOut,
       ),
 

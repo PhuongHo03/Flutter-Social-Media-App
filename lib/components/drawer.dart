@@ -3,10 +3,12 @@ import 'package:social_app/components/list_tile.dart';
 
 class MyDrawer extends StatelessWidget {
   final void Function()? onProfile;
+  final void Function()? onChatRoom;
   final void Function()? onSignOut;
   const MyDrawer({
     super.key,
     required this.onProfile,
+    required this.onChatRoom,
     required this.onSignOut,
   });
 
@@ -40,6 +42,13 @@ class MyDrawer extends StatelessWidget {
                 icon: Icons.person,
                 text: "P R O F I L E",
                 onTap: onProfile,
+              ),
+
+              //chatroom list tile
+              MyListTile(
+                icon: Icons.chat,
+                text: "C H A T R O O M",
+                onTap: onChatRoom,
               ),
             ],
           ),

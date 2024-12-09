@@ -136,6 +136,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
 
+                //email
+                MyTextBox(
+                  text: userData["email"],
+                  sectionName: "email",
+                  onPressed: () => Navigator.pop(context),
+                ),
+
                 //username
                 MyTextBox(
                   text: userData["username"],
