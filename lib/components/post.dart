@@ -30,6 +30,10 @@ class _PostState extends State<Post> {
   //current user
   final currentUser = FirebaseAuth.instance.currentUser!;
 
+  //all user posts
+  final userPostsCollection =
+      FirebaseFirestore.instance.collection("User Posts");
+
   //initialize the liked value
   bool isLiked = false;
 
@@ -216,6 +220,92 @@ class _PostState extends State<Post> {
     );
   }
 
+  //edit post
+  Future<void> editPost() async {
+    String newValue = "";
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Edit Post"),
+        content: TextField(
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: "Enter new message",
+            hintStyle: TextStyle(
+              color: Colors.grey[500],
+            ),
+          ),
+          onChanged: (value) {
+            newValue = value;
+          },
+        ),
+        actions: [
+          //cancer button
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+
+          //save button
+          TextButton(
+            onPressed: () async {
+              //update in firestore
+              await userPostsCollection
+                  .doc(widget.postId)
+                  .update({"Message": newValue});
+              Navigator.pop(context);
+            },
+            child: const Text("Save"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  //edit comment
+  Future<void> editComment(DocumentSnapshot commentSnapshot) async {
+    String newValue = "";
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Edit Comment"),
+        content: TextField(
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: "Enter new comment",
+            hintStyle: TextStyle(
+              color: Colors.grey[500],
+            ),
+          ),
+          onChanged: (value) {
+            newValue = value;
+          },
+        ),
+        actions: [
+          //cancer button
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+
+          //save button
+          TextButton(
+            onPressed: () async {
+              //update in firestore
+              await userPostsCollection
+                  .doc(widget.postId)
+                  .collection("Comments")
+                  .doc(commentSnapshot.id)
+                  .update({"CommentText": newValue});
+              Navigator.pop(context);
+            },
+            child: const Text("Save"),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -266,10 +356,24 @@ class _PostState extends State<Post> {
                 ],
               ),
 
-              //delete post button
+              //edit and delete post if that is current user's post
               if (widget.user == currentUser.email)
-                DeleteButton(
-                  onTap: deletePost,
+                Row(
+                  children: [
+                    //edit post button
+                    IconButton(
+                      onPressed: editPost,
+                      icon: Icon(
+                        Icons.settings,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+
+                    //delete post button
+                    DeleteButton(
+                      onTap: deletePost,
+                    ),
+                  ],
                 ),
             ],
           ),
@@ -374,12 +478,24 @@ class _PostState extends State<Post> {
                         time: formatDate(commentData["CommentTime"]),
                       ),
 
-                      //delete comment button
+                      //edit and delete comment if that is current user's comment
                       if (commentData["CommentedBy"] == currentUser.email)
-                        DeleteButton(
-                          onTap: () {
-                            deleteComment(doc);
-                          },
+                        Row(
+                          children: [
+                            //edit comment button
+                            IconButton(
+                              onPressed: () => editComment(doc),
+                              icon: Icon(
+                                Icons.settings,
+                                color: Colors.grey[400],
+                              ),
+                            ),
+
+                            //delete comment button
+                            DeleteButton(
+                              onTap: () => deleteComment(doc),
+                            ),
+                          ],
                         ),
                     ],
                   );

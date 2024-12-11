@@ -48,8 +48,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
           //save button
           TextButton(
-            onPressed: () {
-              editValue(field, newValue);
+            onPressed: () async {
+              //update in firestore
+              await usersCollection
+                  .doc(currentUser.email)
+                  .update({field: newValue});
               Navigator.pop(context);
             },
             child: const Text("Save"),
@@ -57,11 +60,6 @@ class _ProfilePageState extends State<ProfilePage> {
         ],
       ),
     );
-  }
-
-  //update in firestore
-  void editValue(String field, newValue) async {
-    await usersCollection.doc(currentUser.email).update({field: newValue});
   }
 
   @override
