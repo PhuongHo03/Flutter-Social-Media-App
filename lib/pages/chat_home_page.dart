@@ -4,8 +4,8 @@ import 'package:social_app/components/user_tile.dart';
 import 'package:social_app/pages/chat_page.dart';
 import 'package:social_app/services/chat/chat_service.dart';
 
-class ChatroomPage extends StatelessWidget {
-  ChatroomPage({super.key});
+class ChatHomePage extends StatelessWidget {
+  ChatHomePage({super.key});
 
   //current user
   final currentUser = FirebaseAuth.instance.currentUser!;
@@ -51,6 +51,7 @@ class ChatroomPage extends StatelessWidget {
             context,
             MaterialPageRoute(
               builder: (context) => ChatPage(
+                receiverID: userData["uid"],
                 receiverEmail: userData["username"],
               ),
             ),
@@ -72,7 +73,7 @@ class ChatroomPage extends StatelessWidget {
           color: Colors.white,
         ),
         title: const Text(
-          "Chat Room",
+          "Chat Home",
           style: TextStyle(
             color: Colors.white,
           ),

@@ -53,6 +53,7 @@ class _RegisterPageState extends State<RegisterPage> {
           .collection("Users")
           .doc(userCredential.user!.email)
           .set({
+        "uid": userCredential.user!.uid,
         "email": emailTextController.text,
         "username": emailTextController.text.split("@")[0], //initial username
         "bio": "Empty bio..." //initial empty bio

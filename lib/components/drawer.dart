@@ -44,10 +44,10 @@ class MyDrawer extends StatelessWidget {
                 onTap: onProfile,
               ),
 
-              //chatroom list tile
+              //chat home list tile
               MyListTile(
                 icon: Icons.chat,
-                text: "C H A T R O O M",
+                text: "C H A T H O M E",
                 onTap: onChatRoom,
               ),
             ],
