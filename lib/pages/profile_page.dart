@@ -24,20 +24,15 @@ class _ProfilePageState extends State<ProfilePage> {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[900],
         title: Text(
           "Edit $field",
-          style: const TextStyle(color: Colors.white),
         ),
         content: TextField(
           autofocus: true,
-          style: const TextStyle(
-            color: Colors.white,
-          ),
           decoration: InputDecoration(
             hintText: "Enter new $field",
-            hintStyle: const TextStyle(
-              color: Colors.grey,
+            hintStyle: TextStyle(
+              color: Colors.grey[500],
             ),
           ),
           onChanged: (value) {
@@ -48,53 +43,37 @@ class _ProfilePageState extends State<ProfilePage> {
           //cancer button
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              "Cancel",
-              style: TextStyle(
-                color: Colors.white,
-              ),
-            ),
+            child: const Text("Cancel"),
           ),
 
           //save button
           TextButton(
-            onPressed: () => Navigator.of(context).pop(newValue),
-            child: const Text(
-              "Save",
-              style: TextStyle(
-                color: Colors.white,
-              ),
-            ),
+            onPressed: () {
+              editValue(field, newValue);
+              Navigator.pop(context);
+            },
+            child: const Text("Save"),
           ),
         ],
       ),
     );
+  }
 
-    //update in firestore
-    if (newValue.trim().isNotEmpty) {
-      //only update if there is something in the text field
-      await usersCollection.doc(currentUser.email).update({field: newValue});
-    }
+  //update in firestore
+  void editValue(String field, newValue) async {
+    await usersCollection.doc(currentUser.email).update({field: newValue});
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[300],
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        //color of all icon in appbar
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
         title: const Center(
           child: Text(
             "Profile Page",
-            style: TextStyle(
-              color: Colors.white,
-            ),
           ),
         ),
-        backgroundColor: Colors.grey[900],
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
@@ -134,13 +113,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     "My Details",
                     style: TextStyle(color: Colors.grey[600]),
                   ),
-                ),
-
-                //email
-                MyTextBox(
-                  text: userData["email"],
-                  sectionName: "email",
-                  onPressed: () => Navigator.pop(context),
                 ),
 
                 //username

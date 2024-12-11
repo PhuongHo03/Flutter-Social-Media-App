@@ -87,7 +87,13 @@ class _PostState extends State<Post> {
         title: const Text("Add Comment"),
         content: TextField(
           controller: _commentTextController,
-          decoration: const InputDecoration(hintText: "Write a comment..."),
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: "Write a comment...",
+            hintStyle: TextStyle(
+              color: Colors.grey[500],
+            ),
+          ),
         ),
         actions: [
           //cancel button
@@ -214,7 +220,7 @@ class _PostState extends State<Post> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[200],
+        color: Theme.of(context).colorScheme.primary,
         borderRadius: BorderRadius.circular(8),
       ),
       margin: const EdgeInsets.only(top: 25, left: 25, right: 25),

@@ -7,6 +7,7 @@ import 'package:social_app/components/text_field.dart';
 import 'package:social_app/helper/format_date.dart';
 import 'package:social_app/pages/chat_home_page.dart';
 import 'package:social_app/pages/profile_page.dart';
+import 'package:social_app/pages/settings_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -73,31 +74,38 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  //navigator to settings page
+  void goToSettingsPage() {
+    //pop menu drawer
+    Navigator.pop(context);
+
+    //go to chatroom page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const SettingsPage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       //color of the app's background
-      backgroundColor: Colors.grey[300],
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        //color of all icon in appbar
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
         title: const Center(
           child: Text(
             "Social Media App",
-            style: TextStyle(
-              color: Colors.white,
-            ),
           ),
         ),
-        backgroundColor: Colors.grey[900],
       ),
 
       //drawer
       drawer: MyDrawer(
         onProfile: goToProfilePage,
-        onChatRoom: goToChatHomePage,
+        onChatHome: goToChatHomePage,
+        onSettings: goToSettingsPage,
         onSignOut: signOut,
       ),
 

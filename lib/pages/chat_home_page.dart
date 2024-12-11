@@ -66,19 +66,13 @@ class ChatHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[300],
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        //color of all icon in appbar
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
-        title: const Text(
-          "Chat Home",
-          style: TextStyle(
-            color: Colors.white,
+        title: const Center(
+          child: Text(
+            "Chat Home",
           ),
         ),
-        backgroundColor: Colors.grey[900],
       ),
       body: _buildUsersList(),
     );
