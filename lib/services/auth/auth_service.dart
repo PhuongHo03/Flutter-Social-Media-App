@@ -1,27 +1,57 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:social_app/pages/home_page.dart';
-import 'package:social_app/services/auth/login_or_register.dart';
 
-class AuthService extends StatelessWidget {
-  const AuthService({super.key});
+class AuthService {
+  //get instance of auth & firestore
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: StreamBuilder(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          //user is logged in
-          if (snapshot.hasData) {
-            return const HomePage();
-          }
-          //user is not logged in
-          else {
-            return const LoginOrRegister();
-          }
+  //get current user
+  User? getCurrentUser() {
+    return _auth.currentUser;
+  }
+
+  //sign in
+  Future<UserCredential> signInWithEmailPassword(String email, password) async {
+    try {
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      throw Exception(e.code);
+    }
+  }
+
+  //sign up
+  Future<UserCredential> signUpWithEmailPassword(String email, password) async {
+    try {
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      //after creating the user, create a new document in cloud firestore called Users
+      _firestore.collection("Users").doc(userCredential.user!.email).set(
+        {
+          "uid": userCredential.user!.uid,
+          "email": email,
+          "username": email.split("@")[0], //initial username
+          "bio": "Empty bio..." //initial empty bio
         },
-      ),
-    );
+      );
+
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      throw Exception(e.code);
+    }
+  }
+
+  //sign out
+  Future<void> signOut() async {
+    return await _auth.signOut();
   }
 }

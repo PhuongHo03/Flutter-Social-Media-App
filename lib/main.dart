@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:social_app/firebase_options.dart';
-import 'package:social_app/services/auth/auth_service.dart';
+import 'package:social_app/services/auth/auth_gate.dart';
 import 'package:social_app/themes/theme_provider.dart';
 
 void main() async {
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: Provider.of<ThemeProvider>(context).themeData,
-      home: const AuthService(),
+      home: const AuthGate(),
     );
   }
 }

@@ -1,8 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:social_app/components/button.dart';
 import 'package:social_app/components/text_field.dart';
+import 'package:social_app/services/auth/auth_service.dart';
 
 class RegisterPage extends StatefulWidget {
   final Function()? onTap;
@@ -16,10 +15,13 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  //get auth service
+  final AuthService _authService = AuthService();
+
   // Text Editing Controllers
-  final emailTextController = TextEditingController();
-  final passwordTextController = TextEditingController();
-  final confirmTextController = TextEditingController();
+  final _emailTextController = TextEditingController();
+  final _passwordTextController = TextEditingController();
+  final _confirmTextController = TextEditingController();
 
   //sign user up
   void signUp() async {
@@ -32,52 +34,42 @@ class _RegisterPageState extends State<RegisterPage> {
     );
 
     //check passwords match
-    if (passwordTextController.text != confirmTextController.text) {
+    if (_passwordTextController.text != _confirmTextController.text) {
       //pop loading circle
       Navigator.pop(context);
+
       //display error message
-      displayMessage("Passwords don't match!");
+      showDialog(
+        context: context,
+        builder: (context) => const AlertDialog(
+          title: Text("Passwords don't match!"),
+        ),
+      );
+
       return;
     }
 
     //try sign user up
     try {
-      UserCredential userCredential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailTextController.text,
-        password: passwordTextController.text,
+      await _authService.signUpWithEmailPassword(
+        _emailTextController.text,
+        _passwordTextController.text,
       );
-
-      //after creating the user, create a new document in cloud firestore called Users
-      FirebaseFirestore.instance
-          .collection("Users")
-          .doc(userCredential.user!.email)
-          .set({
-        "uid": userCredential.user!.uid,
-        "email": emailTextController.text,
-        "username": emailTextController.text.split("@")[0], //initial username
-        "bio": "Empty bio..." //initial empty bio
-      });
 
       //pop loading circle
       if (context.mounted) Navigator.pop(context);
-    } on FirebaseAuthException catch (e) {
+    } catch (e) {
       //pop loading circle
       Navigator.pop(context);
-      //display error message
-      displayMessage(e.code);
-    }
-  }
 
-  void displayMessage(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          message,
+      //display error message
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(e.toString()),
         ),
-      ),
-    );
+      );
+    }
   }
 
   @override
@@ -124,7 +116,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 //email text field
                 MyTextField(
-                  controller: emailTextController,
+                  controller: _emailTextController,
                   hintText: "Email",
                   obscureText: false,
                 ),
@@ -133,7 +125,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 //password text field
                 MyTextField(
-                  controller: passwordTextController,
+                  controller: _passwordTextController,
                   hintText: "Password",
                   obscureText: true,
                 ),
@@ -142,7 +134,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 //confirm password text field
                 MyTextField(
-                  controller: confirmTextController,
+                  controller: _confirmTextController,
                   hintText: "Confirm Password",
                   obscureText: true,
                 ),

@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:social_app/components/comment.dart';
 import 'package:social_app/components/comment_button.dart';
 import 'package:social_app/components/delete_button.dart';
 import 'package:social_app/components/like_button.dart';
 import 'package:social_app/helper/format_date.dart';
+import 'package:social_app/services/auth/auth_service.dart';
 
 class Post extends StatefulWidget {
   final String message;
@@ -27,15 +27,12 @@ class Post extends StatefulWidget {
 }
 
 class _PostState extends State<Post> {
-  //current user
-  final currentUser = FirebaseAuth.instance.currentUser!;
-
-  //all user posts
-  final userPostsCollection =
-      FirebaseFirestore.instance.collection("User Posts");
+  //get auth service & instance of firestore
+  final AuthService _authService = AuthService();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   //initialize the liked value
-  bool isLiked = false;
+  bool _isLiked = false;
 
   //comment text controller
   final _commentTextController = TextEditingController();
@@ -43,28 +40,28 @@ class _PostState extends State<Post> {
   @override
   void initState() {
     super.initState();
-    isLiked = widget.likes.contains(currentUser.email);
+    _isLiked = widget.likes.contains(_authService.getCurrentUser()!.email);
   }
 
   //toggle like button
   void toggleLikeButton() {
     setState(() {
-      isLiked = !isLiked;
+      _isLiked = !_isLiked;
     });
 
     //access the document is Firebase
     DocumentReference postRef =
-        FirebaseFirestore.instance.collection("User Posts").doc(widget.postId);
+        _firestore.collection("User Posts").doc(widget.postId);
 
-    if (isLiked) {
+    if (_isLiked) {
       //if the post is now liked, add the user's email to the "Likes" field
       postRef.update({
-        "Likes": FieldValue.arrayUnion([currentUser.email])
+        "Likes": FieldValue.arrayUnion([_authService.getCurrentUser()!.email])
       });
     } else {
       //if the post is now unliked, remove the user's email to the "Likes" field
       postRef.update({
-        "Likes": FieldValue.arrayRemove([currentUser.email])
+        "Likes": FieldValue.arrayRemove([_authService.getCurrentUser()!.email])
       });
     }
   }
@@ -72,13 +69,13 @@ class _PostState extends State<Post> {
   //add a comment
   void addComment(String commentText) {
     //write the comment to firestore under the comments collection for this post
-    FirebaseFirestore.instance
+    _firestore
         .collection("User Posts")
         .doc(widget.postId)
         .collection("Comments")
         .add({
       "CommentText": commentText,
-      "CommentedBy": currentUser.email,
+      "CommentedBy": _authService.getCurrentUser()!.email,
       "CommentTime": Timestamp.now()
     });
   }
@@ -146,7 +143,7 @@ class _PostState extends State<Post> {
           TextButton(
             onPressed: () async {
               //delete the comment
-              await FirebaseFirestore.instance
+              await _firestore
                   .collection("User Posts")
                   .doc(widget.postId)
                   .collection("Comments")
@@ -186,14 +183,14 @@ class _PostState extends State<Post> {
             onPressed: () async {
               //delete the comments from firestore first
               //(if you only delete the post, the comments will be stored in firestore)
-              final commentDocs = await FirebaseFirestore.instance
+              final commentDocs = await _firestore
                   .collection("User Posts")
                   .doc(widget.postId)
                   .collection("Comments")
                   .get();
 
               for (var doc in commentDocs.docs) {
-                await FirebaseFirestore.instance
+                await _firestore
                     .collection("User Posts")
                     .doc(widget.postId)
                     .collection("Comments")
@@ -202,7 +199,7 @@ class _PostState extends State<Post> {
               }
 
               //then delete the post
-              FirebaseFirestore.instance
+              _firestore
                   .collection("User Posts")
                   .doc(widget.postId)
                   .delete()
@@ -250,7 +247,8 @@ class _PostState extends State<Post> {
           TextButton(
             onPressed: () async {
               //update in firestore
-              await userPostsCollection
+              await _firestore
+                  .collection("User Posts")
                   .doc(widget.postId)
                   .update({"Message": newValue});
               Navigator.pop(context);
@@ -292,7 +290,8 @@ class _PostState extends State<Post> {
           TextButton(
             onPressed: () async {
               //update in firestore
-              await userPostsCollection
+              await _firestore
+                  .collection("User Posts")
                   .doc(widget.postId)
                   .collection("Comments")
                   .doc(commentSnapshot.id)
@@ -357,7 +356,7 @@ class _PostState extends State<Post> {
               ),
 
               //edit and delete post if that is current user's post
-              if (widget.user == currentUser.email)
+              if (widget.user == _authService.getCurrentUser()!.email)
                 Row(
                   children: [
                     //edit post button
@@ -389,7 +388,7 @@ class _PostState extends State<Post> {
                 children: [
                   //like button
                   LikeButton(
-                    isLiked: isLiked,
+                    isLiked: _isLiked,
                     onTap: toggleLikeButton,
                   ),
                   const SizedBox(height: 5),
@@ -415,7 +414,7 @@ class _PostState extends State<Post> {
                   const SizedBox(height: 5),
                   //comment count
                   StreamBuilder<int>(
-                    stream: FirebaseFirestore.instance
+                    stream: _firestore
                         .collection("User Posts")
                         .doc(widget.postId)
                         .collection("Comments")
@@ -443,7 +442,7 @@ class _PostState extends State<Post> {
           const SizedBox(height: 20),
           //comment under the post
           StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
+            stream: _firestore
                 .collection("User Posts")
                 .doc(widget.postId)
                 .collection("Comments")
@@ -479,7 +478,8 @@ class _PostState extends State<Post> {
                       ),
 
                       //edit and delete comment if that is current user's comment
-                      if (commentData["CommentedBy"] == currentUser.email)
+                      if (commentData["CommentedBy"] ==
+                          _authService.getCurrentUser()!.email)
                         Row(
                           children: [
                             //edit comment button

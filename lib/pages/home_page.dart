@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:social_app/components/drawer.dart';
 import 'package:social_app/components/post.dart';
@@ -8,6 +7,7 @@ import 'package:social_app/helper/format_date.dart';
 import 'package:social_app/pages/chat_home_page.dart';
 import 'package:social_app/pages/profile_page.dart';
 import 'package:social_app/pages/settings_page.dart';
+import 'package:social_app/services/auth/auth_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,24 +17,25 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  //user
-  final currentUser = FirebaseAuth.instance.currentUser!;
+  //get auth service & instance of firestore
+  final AuthService _authService = AuthService();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   //text controller
-  final textController = TextEditingController();
+  final _textController = TextEditingController();
 
   //sign user out
   void signOut() {
-    FirebaseAuth.instance.signOut();
+    _authService.signOut();
   }
 
   //post message
   void postMessage() {
     //only post if there is something in text field
-    if (textController.text.isNotEmpty) {
-      FirebaseFirestore.instance.collection("User Posts").add({
-        "UserEmail": currentUser.email,
-        "Message": textController.text,
+    if (_textController.text.isNotEmpty) {
+      _firestore.collection("User Posts").add({
+        "UserEmail": _authService.getCurrentUser()!.email,
+        "Message": _textController.text,
         "TimeStamp": Timestamp.now(),
         "Likes": [],
       });
@@ -42,7 +43,7 @@ class _HomePageState extends State<HomePage> {
 
     //clear the text field
     setState(() {
-      textController.clear();
+      _textController.clear();
     });
   }
 
@@ -60,12 +61,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  //navigator to chatroom page
+  //navigator to chat home page
   void goToChatHomePage() {
     //pop menu drawer
     Navigator.pop(context);
 
-    //go to chatroom page
+    //go to chat home page
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -79,7 +80,7 @@ class _HomePageState extends State<HomePage> {
     //pop menu drawer
     Navigator.pop(context);
 
-    //go to chatroom page
+    //go to settings page
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -115,7 +116,7 @@ class _HomePageState extends State<HomePage> {
             //app
             Expanded(
               child: StreamBuilder(
-                stream: FirebaseFirestore.instance
+                stream: _firestore
                     .collection("User Posts")
                     .orderBy(
                       "TimeStamp",
@@ -160,7 +161,7 @@ class _HomePageState extends State<HomePage> {
                   //text field
                   Expanded(
                     child: MyTextField(
-                      controller: textController,
+                      controller: _textController,
                       hintText: "Write something..",
                       obscureText: false,
                     ),
@@ -179,7 +180,7 @@ class _HomePageState extends State<HomePage> {
 
             //logged in as
             Text(
-              "Logged in as: ${currentUser.email!}",
+              "Logged in as: ${_authService.getCurrentUser()!.email!}",
               style: const TextStyle(
                 color: Colors.grey,
               ),

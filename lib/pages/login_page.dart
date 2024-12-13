@@ -1,7 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:social_app/components/button.dart';
 import 'package:social_app/components/text_field.dart';
+import 'package:social_app/services/auth/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   final Function()? onTap;
@@ -15,9 +15,12 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  //get auth service
+  final AuthService _authService = AuthService();
+
   // Text Editing Controllers
-  final emailTextController = TextEditingController();
-  final passwordTextController = TextEditingController();
+  final _emailTextController = TextEditingController();
+  final _passwordTextController = TextEditingController();
 
   //sign user in
   void signIn() async {
@@ -31,30 +34,25 @@ class _LoginPageState extends State<LoginPage> {
 
     //try sign in
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailTextController.text,
-        password: passwordTextController.text,
+      await _authService.signInWithEmailPassword(
+        _emailTextController.text,
+        _passwordTextController.text,
       );
 
       //pop loading circle
       if (context.mounted) Navigator.pop(context);
-    } on FirebaseAuthException catch (e) {
+    } catch (e) {
       //pop loading circle
       Navigator.pop(context);
-      //display error message
-      displayMessage(e.code);
-    }
-  }
 
-  void displayMessage(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          message,
+      //display error message
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(e.toString()),
         ),
-      ),
-    );
+      );
+    }
   }
 
   @override
@@ -101,7 +99,7 @@ class _LoginPageState extends State<LoginPage> {
 
                 //email text field
                 MyTextField(
-                  controller: emailTextController,
+                  controller: _emailTextController,
                   hintText: "Email",
                   obscureText: false,
                 ),
@@ -110,7 +108,7 @@ class _LoginPageState extends State<LoginPage> {
 
                 //password text field
                 MyTextField(
-                  controller: passwordTextController,
+                  controller: _passwordTextController,
                   hintText: "Password",
                   obscureText: true,
                 ),

@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:social_app/components/text_box.dart';
 import 'package:social_app/helper/format_date.dart';
+import 'package:social_app/services/auth/auth_service.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -12,11 +12,9 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  //current user
-  final currentUser = FirebaseAuth.instance.currentUser!;
-
-  //all users
-  final usersCollection = FirebaseFirestore.instance.collection("Users");
+  //get auth service & instance of firestore
+  final AuthService _authService = AuthService();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   //edit field
   Future<void> editField(String field) async {
@@ -50,8 +48,9 @@ class _ProfilePageState extends State<ProfilePage> {
           TextButton(
             onPressed: () async {
               //update in firestore
-              await usersCollection
-                  .doc(currentUser.email)
+              await _firestore
+                  .collection("Users")
+                  .doc(_authService.getCurrentUser()!.email)
                   .update({field: newValue});
               Navigator.pop(context);
             },
@@ -74,9 +73,9 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ),
       body: StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance
+        stream: _firestore
             .collection("Users")
-            .doc(currentUser.email)
+            .doc(_authService.getCurrentUser()!.email)
             .snapshots(),
         builder: (context, snapshots) {
           if (snapshots.hasData) {
@@ -95,7 +94,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                 //user email
                 Text(
-                  currentUser.email!,
+                  _authService.getCurrentUser()!.email!,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.grey[700],
@@ -140,9 +139,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
                 //posts overview
                 StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
+                  stream: _firestore
                       .collection("User Posts")
-                      .where("UserEmail", isEqualTo: currentUser.email)
+                      .where("UserEmail",
+                          isEqualTo: _authService.getCurrentUser()!.email)
                       .snapshots(),
                   builder: (context, snapshots) {
                     if (snapshots.hasData) {
@@ -150,7 +150,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
                       //Filter and sort posts on the client-side
                       final filteredPosts = posts
-                          .where((doc) => doc['UserEmail'] == currentUser.email)
+                          .where((doc) =>
+                              doc['UserEmail'] ==
+                              _authService.getCurrentUser()!.email)
                           .toList();
                       filteredPosts.sort((a, b) => a['TimeStamp']
                           .compareTo(b['TimeStamp'])); //TimeStamp descending

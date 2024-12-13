@@ -1,13 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:social_app/models/message.dart';
+import 'package:social_app/services/auth/auth_service.dart';
 
 class ChatService {
-  //get instance of firestore
+  //get auth service & instance of firestore
+  final AuthService _authService = AuthService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  //current user
-  final currentUser = FirebaseAuth.instance.currentUser!;
 
   //get user stream
   Stream<List<Map<String, dynamic>>> getUserStream() {
@@ -23,8 +21,8 @@ class ChatService {
   //send message
   Future<void> sendMessage(String receiverID, message) async {
     //get current user info
-    final String currentUserID = currentUser.uid;
-    final String currentUserEmail = currentUser.email!;
+    final String currentUserID = _authService.getCurrentUser()!.uid;
+    final String currentUserEmail = _authService.getCurrentUser()!.email!;
     final Timestamp timestamp = Timestamp.now();
 
     //create a new message

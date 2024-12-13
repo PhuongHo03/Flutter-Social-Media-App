@@ -1,6 +1,6 @@
-//return a formatted data as a string
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+//return a formatted data as a string
 String formatDate(Timestamp timestamp) {
   //Timestamp is the object we retrieve from firebase
   //so to display it, lets convert it to a String

@@ -1,17 +1,15 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:social_app/components/user_tile.dart';
 import 'package:social_app/pages/chat_page.dart';
+import 'package:social_app/services/auth/auth_service.dart';
 import 'package:social_app/services/chat/chat_service.dart';
 
 class ChatHomePage extends StatelessWidget {
   ChatHomePage({super.key});
 
-  //current user
-  final currentUser = FirebaseAuth.instance.currentUser!;
-
-  //chat service
+  //get chat & auth service
   final ChatService _chatService = ChatService();
+  final AuthService _authService = AuthService();
 
   //build a list of users except for the current login user
   Widget _buildUsersList() {
@@ -42,7 +40,7 @@ class ChatHomePage extends StatelessWidget {
   Widget _buildUsersListItem(
       Map<String, dynamic> userData, BuildContext context) {
     //display all users except current user
-    if (userData["email"] != currentUser.email) {
+    if (userData["email"] != _authService.getCurrentUser()!.email) {
       return UserTile(
         text: userData["username"],
         onTap: () {

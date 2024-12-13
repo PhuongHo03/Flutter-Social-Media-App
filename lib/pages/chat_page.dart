@@ -1,14 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:social_app/components/chat_bubble.dart';
 import 'package:social_app/components/text_field.dart';
+import 'package:social_app/services/auth/auth_service.dart';
 import 'package:social_app/services/chat/chat_service.dart';
 
 class ChatPage extends StatefulWidget {
   final String receiverID;
   final String receiverEmail;
-  ChatPage({
+  const ChatPage({
     super.key,
     required this.receiverID,
     required this.receiverEmail,
@@ -20,24 +20,22 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   //text controller
-  final textController = TextEditingController();
+  final _textController = TextEditingController();
 
-  //chat services
+  //get chat & auth service
   final ChatService _chatService = ChatService();
-
-  //current user
-  final currentUser = FirebaseAuth.instance.currentUser!;
+  final AuthService _authService = AuthService();
 
   //text field focus
-  FocusNode myFocusNode = FocusNode();
+  final FocusNode _myFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
 
     //add listener to focus node
-    myFocusNode.addListener(() {
-      if (myFocusNode.hasFocus) {
+    _myFocusNode.addListener(() {
+      if (_myFocusNode.hasFocus) {
         //cause a delay so that the keyboard has time to show up
         //then the amount of remaining space will be calculated, then scroll down
         Future.delayed(
@@ -56,8 +54,8 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   void dispose() {
-    myFocusNode.dispose();
-    textController.dispose();
+    _myFocusNode.dispose();
+    _textController.dispose();
     super.dispose();
   }
 
@@ -74,12 +72,12 @@ class _ChatPageState extends State<ChatPage> {
   //send message
   void sendMessage() async {
     //if there is something inside the text field
-    if (textController.text.isNotEmpty) {
+    if (_textController.text.isNotEmpty) {
       //send the message
-      await _chatService.sendMessage(widget.receiverID, textController.text);
+      await _chatService.sendMessage(widget.receiverID, _textController.text);
 
       //clear the text controller
-      textController.clear();
+      _textController.clear();
     }
 
     //scroll down after send a message
@@ -88,7 +86,7 @@ class _ChatPageState extends State<ChatPage> {
 
   //build messages list
   Widget _buildMessagesList() {
-    String senderID = currentUser.uid;
+    String senderID = _authService.getCurrentUser()!.uid;
     return StreamBuilder(
       stream: _chatService.getMessages(senderID, widget.receiverID),
       builder: (context, snapshot) {
@@ -117,7 +115,7 @@ class _ChatPageState extends State<ChatPage> {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
     //is current user
-    bool isCurrentUser = data["senderID"] == currentUser.uid;
+    bool isCurrentUser = data["senderID"] == _authService.getCurrentUser()!.uid;
 
     //align message to the right if sender is the current user, otherwise left
     var alignment =
@@ -156,10 +154,10 @@ class _ChatPageState extends State<ChatPage> {
                 //text field
                 Expanded(
                   child: MyTextField(
-                    controller: textController,
+                    controller: _textController,
                     hintText: "Write something..",
                     obscureText: false,
-                    focusNode: myFocusNode,
+                    focusNode: _myFocusNode,
                   ),
                 ),
 
