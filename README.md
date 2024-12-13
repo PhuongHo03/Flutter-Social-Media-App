@@ -14,11 +14,13 @@ Flutter-Social-Media-App có những tính năng chính như sau:
 
 4. **Thích bài viết:** Người dùng có thể thích các bài đăng.
 
-5. **Hồ sơ người dùng:** Đây là nơi người dùng có thể theo dõi các thông tin và bài đăng của mình.
+5. **Trò chuyện trực tuyến:** Ứng dụng cung cấp nơi để các người dùng có thể trò chuyện trực tuyến với nhau một cách riêng tư.
 
-6. **Chuyển chủ đề màu:** Người dùng có thể chuyển đổi qua lại giữa chủ đề màu sáng hoặc tối cho ứng dụng.
+6. **Hồ sơ người dùng:** Đây là nơi người dùng có thể theo dõi các thông tin và bài đăng của mình.
 
-7. **Bảng tin:** Đây là nơi người dùng có thể theo dõi các hoạt động trên ứng dụng.
+7. **Chuyển chủ đề màu:** Người dùng có thể chuyển đổi qua lại giữa chủ đề màu sáng hoặc tối cho ứng dụng.
+
+8. **Bảng tin:** Đây là nơi người dùng có thể theo dõi các hoạt động trên ứng dụng.
 
 ## Để chạy được dự án này:
 
@@ -57,7 +59,7 @@ Flutter pub get
 Flutter-Social-Media-App sử dụng các dịch vụ của Firebase làm nền tảng phụ trợ, tận dụng các tài nguyên do Firebase cung cấp để đảm bảo trải nghiệm người dùng mượt mà và đáng tin cậy. Các thiết lập Firebase bao gồm:
 
 * **Firebase Auth:** Được sử dụng để xác thực người dùng, cho phép đăng ký và đăng nhập an toàn.
-* **Firebase Firestore:** Chịu trách nhiệm lưu trữ thông tin người dùng, bài viết của người dùng và bình luận của người dùng. Đây là cơ sở dữ liệu thời gian thực giúp thông tin được đồng bộ hóa trên tất cả các thiết bị được kết nối.
+* **Firebase Firestore:** Chịu trách nhiệm lưu trữ các thông tin, bài viết, bình luận, lượt thích và những đoạn hội thoại của người dùng. Đây là cơ sở dữ liệu thời gian thực giúp thông tin được đồng bộ hóa trên tất cả các thiết bị được kết nối.
 
 ## Contributing
 
